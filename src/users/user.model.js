@@ -1,0 +1,34 @@
+const {Schema,model} = require('mongoose');
+const bcrypt = require('bcrypt');
+
+const userShecma = new Schema({
+    username: {type:String,require:true,unique:true},
+    email:{type:String,require:true,unique:true},
+    password:{type:String,require:true},
+    role:{
+        type:String,default:'user'
+    },
+    profileImage:String,
+    bio:{type:String,maxlength:200},
+    profession:String,
+    createdAt:{
+        type:Date,
+        default:Date.now
+    }
+});
+
+// hashing passwords
+userShecma.pre('save', async function() {
+    const user = this;
+    if (!user.isModified('password')) return;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(user.password, salt);
+    user.password = hashedPassword;
+});
+
+// match passwords
+userShecma.methods.comparePassword = function(cadidatePassword) {
+    return bcrypt.compare(cadidatePassword, this.password)
+}
+const User = new model('User',userShecma);
+module.exports = User;
