@@ -30,14 +30,9 @@ app.use("/api/reviews", reviewRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/stats', statsRoutes);
 
-main().then(() => console.log("mongodb is successfully connected.")).catch(err => console.log(err));
-
-async function main() {
-  await mongoose.connect(process.env.DB_URL);
-  app.get('/', (req, res) => {
-    res.send('Lebaba E-commerce Server is running....!');
-  });
-}
+app.get('/', (req, res) => {
+  res.send('Lebaba E-commerce Server is running....!');
+});
 
 app.post("/uploadImage", (req, res) => {
   uploadImage(req.body.image)
@@ -48,6 +43,17 @@ app.post("/uploadImage", (req, res) => {
     });
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+async function main() {
+  try {
+    await mongoose.connect(process.env.DB_URL);
+    console.log("MongoDB is successfully connected.");
+    
+    app.listen(port, () => {
+      console.log(`Example app listening on port ${port}`);
+    });
+  } catch (err) {
+    console.log("Database connection error:", err);
+  }
+}
+
+main();
