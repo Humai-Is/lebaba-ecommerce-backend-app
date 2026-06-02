@@ -2,10 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const app = express();
 require('dotenv').config();
 
-const port = process.env.PORT || 5000;
+const app = express();
 
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ limit: "25mb", extended: true }));
@@ -16,8 +15,8 @@ app.use(cors({
   credentials: true
 }));
 
+// Məpşrutlar (Routes)
 const uploadImage = require("./src/utils/uploadImage");
-
 const authRoutes = require('./src/users/user.route');
 const productRoutes = require('./src/products/products.route');
 const reviewRoutes = require('./src/reviews/reviews.router');
@@ -37,23 +36,11 @@ app.get('/', (req, res) => {
 app.post("/uploadImage", (req, res) => {
   uploadImage(req.body.image)
     .then((url) => res.send(url))
-    .catch((err) => {
-      console.error("Cloudinary Error:", err);
-      res.status(500).send(err);
-    });
+    .catch((err) => res.status(500).send(err));
 });
 
-async function main() {
-  try {
-    await mongoose.connect(process.env.DB_URL);
-    console.log("MongoDB is successfully connected.");
-    
-    app.listen(port, () => {
-      console.log(`Example app listening on port ${port}`);
-    });
-  } catch (err) {
-    console.log("Database connection error:", err);
-  }
-}
+mongoose.connect(process.env.DB_URL)
+  .then(() => console.log("MongoDB connected."))
+  .catch(err => console.log(err));
 
-main();
+module.exports = app;
